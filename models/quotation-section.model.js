@@ -17,7 +17,7 @@ QuotationSection.init(
       onDelete: 'CASCADE',
     },
     name: {
-      type: DataTypes.STRING(200),
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     sortOrder: {

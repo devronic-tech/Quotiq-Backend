@@ -205,3 +205,64 @@ export const generateQuotation = asyncHandler(async (req, res) => {
     throw new ValidationError(`Quotation generation failed: ${err.message}`);
   }
 });
+
+/**
+ * POST /api/v1/ai/transcribe
+ * Accepts a raw audio file (via multer) and returns the transcript string.
+ */
+export const transcribeOnly = asyncHandler(async (req, res) => {
+  const file = req.file || req.files?.[0];
+  if (!file) throw new ValidationError('No audio file provided');
+
+  const transcript = await transcribeAudio(file.buffer, file.mimetype);
+  res.status(StatusCodes.OK).json({ success: true, data: { transcript } });
+});
+
+/**
+ * POST /api/v1/ai/enhance-text
+ * Accepts { text, context } and returns an AI-polished version.
+ */
+export const enhanceText = asyncHandler(async (req, res) => {
+  const { text, context } = req.body;
+  if (!text || text.trim() === '') throw new ValidationError('text is required');
+
+  if (!env.GROQ_API_KEY) throw new Error('Groq API key is not configured');
+
+  const systemPrompt = `You are a professional business writing assistant.
+Polish and enhance the following text into a concise, professional note suitable for a CRM follow-up event log.
+Preserve all factual details. Improve grammar, clarity, and tone.
+Output ONLY the enhanced text — no preamble, no bullet prefixes, no markdown.`;
+
+  const userMessage = context
+    ? `Context: ${context}\n\nText to enhance: ${text}`
+    : text;
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: 0.4,
+      max_tokens: 512,
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    logger.error({ status: response.status, error: errText }, 'Groq enhance failed');
+    throw new Error(`Groq API returned status ${response.status}`);
+  }
+
+  const result = await response.json();
+  const enhanced = result.choices?.[0]?.message?.content?.trim();
+  if (!enhanced) throw new Error('Empty response from AI model');
+
+  res.status(StatusCodes.OK).json({ success: true, data: { enhanced } });
+});

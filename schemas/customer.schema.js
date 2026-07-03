@@ -12,10 +12,14 @@ export const addressSchema = z.object({
 export const customerSchema = z.object({
   name: z.string().min(1, 'Customer contact name is required').max(200).trim(),
   company: z.string().max(200).trim().optional(),
-  email: z.string().email('Invalid email address').toLowerCase().trim().or(z.literal('')),
+  email: z.string().email('Invalid email address').toLowerCase().trim().or(z.literal('')).optional(),
   phone: z.string().max(50).trim().optional(),
   gstNumber: z.string().max(15).trim().optional(),
   panNumber: z.string().max(10).trim().optional(),
   notes: z.string().trim().optional(),
+  status: z.enum(['active', 'completed', 'discarded']).optional(),
+  departmentId: z.string().uuid().or(z.literal('')).nullable().optional(),
+  notesList: z.array(z.any()).optional(),
+  followupsList: z.array(z.any()).optional(),
   addresses: z.array(addressSchema).optional(),
 });

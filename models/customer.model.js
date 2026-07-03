@@ -57,6 +57,27 @@ Customer.init(
       allowNull: true,
       defaultValue: null,
     },
+    status: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      defaultValue: 'active',
+    },
+    departmentId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: { model: 'departments', key: 'id' },
+      onDelete: 'SET NULL',
+    },
+    notesList: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: [],
+    },
+    followupsList: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: [],
+    },
     createdBy: {
       type: DataTypes.UUID,
       allowNull: true,

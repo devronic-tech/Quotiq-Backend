@@ -13,6 +13,7 @@ export const listInvoices = asyncHandler(async (req, res) => {
     where: { tenantId },
     include: [
       { model: Customer, as: 'customer', attributes: ['id', 'name', 'company', 'email'] },
+      { model: Payment, as: 'payments' },
     ],
     order: [['createdAt', 'DESC']],
   });

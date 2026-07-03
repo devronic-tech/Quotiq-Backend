@@ -13,7 +13,7 @@ export const lineItemSchema = z.object({
 });
 
 export const sectionSchema = z.object({
-  name: z.string().min(1, 'Section name is required').max(200),
+  name: z.string().min(1, 'Section name is required').max(5000),
   items: z.array(lineItemSchema).min(1, 'At least one item is required in each section'),
 });
 

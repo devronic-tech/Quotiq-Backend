@@ -125,7 +125,7 @@ export const createQuotation = asyncHandler(async (req, res) => {
 
     // Resolve customerName to customerId
     let resolvedCustomerId = input.customerId;
-    if (input.customerName) {
+    if (!resolvedCustomerId && input.customerName) {
       let customer = await Customer.findOne({
         where: { tenantId, name: input.customerName },
         transaction: t

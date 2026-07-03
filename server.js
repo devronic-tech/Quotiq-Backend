@@ -9,7 +9,7 @@ const PORT = env.PORT;
 async function start() {
   try {
     await connectDatabase();
-
+    
     const server = app.listen(PORT, () => {
       logger.info(`🚀 QuotaFlow API running on http://localhost:${PORT}`);
       logger.info(`📋 Environment: ${env.NODE_ENV}`);

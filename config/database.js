@@ -67,8 +67,13 @@ export async function connectDatabase() {
     if (env.NODE_ENV === 'development') {
       const { registerAssociations } = await import('../models/index.js');
       registerAssociations();
-      // Skip sync by default on reload to keep log clean
-      // await sequelize.sync();
+      // Sync only the new finance models to avoid altering existing tables (which causes errors in Sequelize PostgreSQL auto-alter scripts)
+      const { Expense, Liability, Subscription, Payroll, Transaction } = await import('../models/index.js');
+      await Expense.sync();
+      await Liability.sync();
+      await Subscription.sync();
+      await Payroll.sync();
+      await Transaction.sync();
       logger.info('✅ Database tables loaded');
     }
   } catch (error) {

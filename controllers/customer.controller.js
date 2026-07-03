@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { sequelize } from '../config/database.js';
-import { Customer, CustomerAddress } from '../models/index.js';
+import { Customer, CustomerAddress, Department } from '../models/index.js';
 import { asyncHandler } from '../utils/async-handler.js';
 import { NotFoundError } from '../utils/app-error.js';
 
@@ -11,7 +11,10 @@ export const listCustomers = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const customers = await Customer.findAll({
     where: { tenantId },
-    include: [{ model: CustomerAddress, as: 'addresses' }],
+    include: [
+      { model: CustomerAddress, as: 'addresses' },
+      { model: Department, as: 'department' }
+    ],
     order: [['createdAt', 'DESC']],
   });
 
@@ -30,7 +33,10 @@ export const getCustomer = asyncHandler(async (req, res) => {
 
   const customer = await Customer.findOne({
     where: { id, tenantId },
-    include: [{ model: CustomerAddress, as: 'addresses' }],
+    include: [
+      { model: CustomerAddress, as: 'addresses' },
+      { model: Department, as: 'department' }
+    ],
   });
 
   if (!customer) {
@@ -62,6 +68,10 @@ export const createCustomer = asyncHandler(async (req, res) => {
         gstNumber: input.gstNumber || null,
         panNumber: input.panNumber || null,
         notes: input.notes || null,
+        status: input.status || 'active',
+        departmentId: input.departmentId || null,
+        notesList: input.notesList || [],
+        followupsList: input.followupsList || [],
         createdBy: userId,
       },
       { transaction: t }
@@ -121,6 +131,10 @@ export const updateCustomer = asyncHandler(async (req, res) => {
         gstNumber: input.gstNumber || null,
         panNumber: input.panNumber || null,
         notes: input.notes || null,
+        status: input.status || customer.status,
+        notesList: input.notesList !== undefined ? input.notesList : customer.notesList,
+        followupsList: input.followupsList !== undefined ? input.followupsList : customer.followupsList,
+        departmentId: input.departmentId !== undefined ? (input.departmentId || null) : customer.departmentId,
         updatedBy: userId,
       },
       { transaction: t }

@@ -12,6 +12,12 @@ import { QuotationItem } from './quotation-item.model.js';
 import { Invoice } from './invoice.model.js';
 import { InvoiceItem } from './invoice-item.model.js';
 import { Payment } from './payment.model.js';
+import { OfferLetter } from './offer-letter.model.js';
+import { Expense } from './expense.model.js';
+import { Liability } from './liability.model.js';
+import { Subscription } from './subscription.model.js';
+import { Payroll } from './payroll.model.js';
+import { Transaction } from './transaction.model.js';
 
 export function registerAssociations() {
   // Organization ↔ User
@@ -45,6 +51,17 @@ export function registerAssociations() {
   Department.belongsTo(Organization, {
     foreignKey: 'tenantId',
     as: 'organization',
+  });
+
+  // Department ↔ Customer
+  Department.hasMany(Customer, {
+    foreignKey: 'departmentId',
+    as: 'customers',
+    onDelete: 'SET NULL',
+  });
+  Customer.belongsTo(Department, {
+    foreignKey: 'departmentId',
+    as: 'department',
   });
 
   // Organization ↔ Customer
@@ -216,6 +233,72 @@ export function registerAssociations() {
     foreignKey: 'invoiceId',
     as: 'invoice',
   });
+
+  // Organization ↔ OfferLetter
+  Organization.hasMany(OfferLetter, {
+    foreignKey: 'tenantId',
+    as: 'offerLetters',
+    onDelete: 'CASCADE',
+  });
+  OfferLetter.belongsTo(Organization, {
+    foreignKey: 'tenantId',
+    as: 'organization',
+  });
+
+  // Organization ↔ Expense
+  Organization.hasMany(Expense, {
+    foreignKey: 'tenantId',
+    as: 'expenses',
+    onDelete: 'CASCADE',
+  });
+  Expense.belongsTo(Organization, {
+    foreignKey: 'tenantId',
+    as: 'organization',
+  });
+
+  // Organization ↔ Liability
+  Organization.hasMany(Liability, {
+    foreignKey: 'tenantId',
+    as: 'liabilities',
+    onDelete: 'CASCADE',
+  });
+  Liability.belongsTo(Organization, {
+    foreignKey: 'tenantId',
+    as: 'organization',
+  });
+
+  // Organization ↔ Subscription
+  Organization.hasMany(Subscription, {
+    foreignKey: 'tenantId',
+    as: 'subscriptions',
+    onDelete: 'CASCADE',
+  });
+  Subscription.belongsTo(Organization, {
+    foreignKey: 'tenantId',
+    as: 'organization',
+  });
+
+  // Organization ↔ Payroll
+  Organization.hasMany(Payroll, {
+    foreignKey: 'tenantId',
+    as: 'payroll',
+    onDelete: 'CASCADE',
+  });
+  Payroll.belongsTo(Organization, {
+    foreignKey: 'tenantId',
+    as: 'organization',
+  });
+
+  // Organization ↔ Transaction
+  Organization.hasMany(Transaction, {
+    foreignKey: 'tenantId',
+    as: 'transactions',
+    onDelete: 'CASCADE',
+  });
+  Transaction.belongsTo(Organization, {
+    foreignKey: 'tenantId',
+    as: 'organization',
+  });
 }
 
 export {
@@ -234,4 +317,10 @@ export {
   Invoice,
   InvoiceItem,
   Payment,
+  OfferLetter,
+  Expense,
+  Liability,
+  Subscription,
+  Payroll,
+  Transaction,
 };

@@ -14,5 +14,7 @@ const upload = multer({
 router.use(authenticate);
 
 router.post('/generate-quotation', upload.any(), aiController.generateQuotation);
+router.post('/transcribe', upload.any(), aiController.transcribeOnly);
+router.post('/enhance-text', aiController.enhanceText);
 
 export default router;
