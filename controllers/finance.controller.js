@@ -35,11 +35,11 @@ export const triggerSeed = asyncHandler(async (req, res) => {
 export const getFinanceSummary = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
 
-  // 1. Calculate Incomes vs Expenses from ledger and client invoices
+  // 1. Calculate Incomes vs Expenses from ledger and client invoices (cash basis)
   const transactions = await Transaction.findAll({ where: { tenantId } });
   const invoicesListForBalance = await Invoice.findAll({ where: { tenantId } });
 
-  const totalInvoiceRevenue = invoicesListForBalance.reduce((sum, inv) => sum + Number(inv.grandTotal), 0);
+  const totalInvoiceRevenue = invoicesListForBalance.reduce((sum, inv) => sum + Number(inv.amountPaid), 0);
   
   let totalIncome = totalInvoiceRevenue;
   let totalExpense = 0;
@@ -70,7 +70,7 @@ export const getFinanceSummary = asyncHandler(async (req, res) => {
   });
 
   invoicesListForBalance.forEach(inv => {
-    const amt = Number(inv.grandTotal);
+    const amt = Number(inv.amountPaid);
     const invDate = new Date(inv.issueDate);
     const isRecent = invDate >= thirtyDaysAgo;
     const isPrevRange = invDate >= sixtyDaysAgo && invDate < thirtyDaysAgo;
@@ -135,7 +135,7 @@ export const getFinanceSummary = asyncHandler(async (req, res) => {
   const revGroup = {};
   invoicesList.forEach(inv => {
     const t = inv.type || 'Other';
-    revGroup[t] = (revGroup[t] || 0) + Number(inv.grandTotal);
+    revGroup[t] = (revGroup[t] || 0) + Number(inv.amountPaid);
   });
   const revenueSourcesPie = Object.keys(revGroup).map((key, idx) => {
     const colors = ['#004ac6', '#2563eb', '#505f76', '#6366f1', '#0ea5e9', '#ec4899', '#ef4444', '#14b8a6'];
@@ -278,6 +278,8 @@ export const getCashFlowHistory = asyncHandler(async (req, res) => {
     order: [['date', 'ASC']]
   });
 
+  const invoicesList = await Invoice.findAll({ where: { tenantId } });
+
   // Group by date
   let intervals = [];
   const now = new Date();
@@ -326,6 +328,13 @@ export const getCashFlowHistory = asyncHandler(async (req, res) => {
       }
     });
 
+    invoicesList.forEach(inv => {
+      const invDate = new Date(inv.updatedAt || inv.issueDate);
+      if (invDate >= startDate && invDate < endDate) {
+        inc += Number(inv.amountPaid);
+      }
+    });
+
     runningBalance += (inc - exp);
 
     return {
@@ -354,7 +363,7 @@ export const getSankeyData = asyncHandler(async (req, res) => {
   const payrollList = await Payroll.findAll({ where: { tenantId } });
 
   const invoicesList = await Invoice.findAll({ where: { tenantId } });
-  const totalInvoiceRevenue = invoicesList.reduce((sum, inv) => sum + Number(inv.grandTotal), 0);
+  const totalInvoiceRevenue = invoicesList.reduce((sum, inv) => sum + Number(inv.amountPaid), 0);
   const totalRevenue = totalInvoiceRevenue + transactions.reduce((sum, t) => sum + Number(t.amount), 0);
   const totalSalaries = payrollList.reduce((sum, p) => sum + Number(p.salary), 0);
 
