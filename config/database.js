@@ -64,18 +64,13 @@ export async function connectDatabase() {
     await sequelize.authenticate();
     logger.info('✅ PostgreSQL connected');
 
-    if (env.NODE_ENV === 'development') {
-      const { registerAssociations } = await import('../models/index.js');
-      registerAssociations();
-      // Sync only the new finance models to avoid altering existing tables (which causes errors in Sequelize PostgreSQL auto-alter scripts)
-      const { Expense, Liability, Subscription, Payroll, Transaction } = await import('../models/index.js');
-      await Expense.sync();
-      await Liability.sync();
-      await Subscription.sync();
-      await Payroll.sync();
-      await Transaction.sync();
-      logger.info('✅ Database tables loaded');
-    }
+    // Register associations in ALL environments so Sequelize models are loaded and associated
+    const { registerAssociations } = await import('../models/index.js');
+    registerAssociations();
+
+    // Sync database models (CREATE TABLE IF NOT EXISTS) so tables are created on fresh deployments
+    await sequelize.sync();
+    logger.info('✅ Database tables loaded and synced');
   } catch (error) {
     logger.fatal({ error }, '❌ Failed to connect to PostgreSQL');
     process.exit(1);
