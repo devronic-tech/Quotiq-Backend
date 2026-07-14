@@ -15,6 +15,7 @@ const transport =
 
 const logger = pino({
   level: env.LOG_LEVEL,
+  timestamp: () => `,"time":"${new Date().toISOString()}"`,
   transport,
   redact: {
     paths: ['req.headers.authorization', 'password', 'token', 'apiKey', 'refreshToken'],

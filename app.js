@@ -41,10 +41,25 @@ const pinoLogger = pinoHttp.pinoHttp || pinoHttp.default || pinoHttp;
 app.use(
   pinoLogger({
     logger,
+    autoLogging: true,
+    serializers: {
+      req: () => undefined,
+      res: () => undefined,
+      err: (err) => ({
+        type: err.type || err.name,
+        message: err.message,
+        stack: env.NODE_ENV === 'development' ? err.stack : undefined,
+      }),
+    },
     customProps: (req) => ({
       requestId: req.requestId,
     }),
-    autoLogging: false,
+    customSuccessMessage: (req, res, responseTime) => {
+      return `${req.method} ${req.url} - ${res.statusCode} (${responseTime}ms)`;
+    },
+    customErrorMessage: (req, res, err) => {
+      return `${req.method} ${req.url} - ${res.statusCode} - Error: ${err.message}`;
+    },
   })
 );
 app.use(hpp());
