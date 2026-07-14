@@ -1,8 +1,8 @@
-import { StatusCodes } from 'http-status-codes';
-import { env } from '../config/env.js';
-import { logger } from '../utils/logger.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { ValidationError } from '../utils/app-error.js';
+const { StatusCodes } = require('http-status-codes');
+const { env } = require('../config/env.js');
+const { logger } = require('../utils/logger.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { ValidationError } = require('../utils/app-error.js');
 
 /**
  * Transcribes audio buffer using Deepgram API
@@ -41,7 +41,7 @@ async function transcribeAudio(audioBuffer, mimeType) {
  */
 async function parsePDF(buffer) {
   try {
-    const pdfParse = (await import('pdf-parse')).default;
+    const pdfParse = require('pdf-parse');
     const data = await pdfParse(buffer);
     return data.text;
   } catch (err) {
@@ -55,7 +55,7 @@ async function parsePDF(buffer) {
  */
 async function parseDocx(buffer) {
   try {
-    const mammoth = (await import('mammoth')).default;
+    const mammoth = require('mammoth');
     const result = await mammoth.extractRawText({ buffer });
     return result.value;
   } catch (err) {
@@ -154,7 +154,7 @@ Do not output any markdown formatting, preambles, or explanations outside the JS
  * - An audio or document file (via multer)
  * - A text description (via req.body.description)
  */
-export const generateQuotation = asyncHandler(async (req, res) => {
+const generateQuotation = asyncHandler(async (req, res) => {
   let textContent = req.body?.description;
   const file = req.file || req.files?.[0];
 
@@ -210,7 +210,7 @@ export const generateQuotation = asyncHandler(async (req, res) => {
  * POST /api/v1/ai/transcribe
  * Accepts a raw audio file (via multer) and returns the transcript string.
  */
-export const transcribeOnly = asyncHandler(async (req, res) => {
+const transcribeOnly = asyncHandler(async (req, res) => {
   const file = req.file || req.files?.[0];
   if (!file) throw new ValidationError('No audio file provided');
 
@@ -222,7 +222,7 @@ export const transcribeOnly = asyncHandler(async (req, res) => {
  * POST /api/v1/ai/enhance-text
  * Accepts { text, context } and returns an AI-polished version.
  */
-export const enhanceText = asyncHandler(async (req, res) => {
+const enhanceText = asyncHandler(async (req, res) => {
   const { text, context } = req.body;
   if (!text || text.trim() === '') throw new ValidationError('text is required');
 
@@ -266,3 +266,9 @@ Output ONLY the enhanced text — no preamble, no bullet prefixes, no markdown.`
 
   res.status(StatusCodes.OK).json({ success: true, data: { enhanced } });
 });
+
+module.exports = {
+  generateQuotation,
+  transcribeOnly,
+  enhanceText
+};

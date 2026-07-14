@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import dotenv from 'dotenv';
+const { z } = require('zod');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
@@ -17,6 +17,7 @@ const envSchema = z.object({
     .string()
     .default('false')
     .transform((v) => v === 'true' || v === '1'),
+  DATABASE_URL: z.string().optional(),
 
   // JWT
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
@@ -61,4 +62,8 @@ if (!parsed.success) {
   process.exit(1);
 }
 
-export const env = parsed.data;
+const env = parsed.data;
+
+module.exports = {
+  env
+};

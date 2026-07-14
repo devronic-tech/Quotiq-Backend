@@ -1,14 +1,14 @@
-import { OfferLetter } from '../models/index.js';
-import { StatusCodes } from 'http-status-codes';
-import { asyncHandler } from '../utils/async-handler.js';
-import { NotFoundError } from '../utils/app-error.js';
-import { createOfferSchema, updateOfferSchema } from '../schemas/offer-letter.schema.js';
-import { sequelize } from '../config/database.js';
+const { OfferLetter } = require('../models/index.js');
+const { StatusCodes } = require('http-status-codes');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { NotFoundError } = require('../utils/app-error.js');
+const { createOfferSchema, updateOfferSchema } = require('../schemas/offer-letter.schema.js');
+const { sequelize } = require('../config/database.js');
 
 /**
  * GET /api/v1/offers
  */
-export const listOffers = asyncHandler(async (req, res) => {
+const listOffers = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const offers = await OfferLetter.findAll({
     where: { tenantId },
@@ -24,7 +24,7 @@ export const listOffers = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/offers/:id
  */
-export const getOffer = asyncHandler(async (req, res) => {
+const getOffer = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -45,7 +45,7 @@ export const getOffer = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/offers
  */
-export const createOffer = asyncHandler(async (req, res) => {
+const createOffer = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   
   // Validate request body
@@ -100,7 +100,7 @@ export const createOffer = asyncHandler(async (req, res) => {
 /**
  * PUT /api/v1/offers/:id
  */
-export const updateOffer = asyncHandler(async (req, res) => {
+const updateOffer = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -149,7 +149,7 @@ export const updateOffer = asyncHandler(async (req, res) => {
 /**
  * DELETE /api/v1/offers/:id
  */
-export const deleteOffer = asyncHandler(async (req, res) => {
+const deleteOffer = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -165,3 +165,11 @@ export const deleteOffer = asyncHandler(async (req, res) => {
     message: 'Offer letter deleted successfully',
   });
 });
+
+module.exports = {
+  listOffers,
+  getOffer,
+  createOffer,
+  updateOffer,
+  deleteOffer
+};

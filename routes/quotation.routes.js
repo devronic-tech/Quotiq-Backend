@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import { createQuotationSchema } from '../schemas/quotation.schema.js';
-import { validate } from '../middleware/validate.middleware.js';
-import { authenticate } from '../middleware/auth.middleware.js';
-import * as quotationController from '../controllers/quotation.controller.js';
+const { Router } = require('express');
+const { createQuotationSchema } = require('../schemas/quotation.schema.js');
+const { validate } = require('../middleware/validate.middleware.js');
+const { authenticate } = require('../middleware/auth.middleware.js');
+const quotationController = require('../controllers/quotation.controller.js');
 
 const router = Router();
 
@@ -15,4 +15,4 @@ router.patch('/:id/status', quotationController.patchQuotationStatus);
 router.put('/:id', validate({ body: createQuotationSchema }), quotationController.updateQuotation);
 router.delete('/:id', quotationController.deleteQuotation);
 
-export default router;
+module.exports = router;

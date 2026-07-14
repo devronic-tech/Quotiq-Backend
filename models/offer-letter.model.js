@@ -1,7 +1,7 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database.js');
 
-export class OfferLetter extends Model {}
+class OfferLetter extends Model {}
 
 OfferLetter.init(
   {
@@ -85,3 +85,7 @@ OfferLetter.init(
     timestamps: true,
   }
 );
+
+module.exports = {
+  OfferLetter
+};

@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import multer from 'multer';
-import { authenticate } from '../middleware/auth.middleware.js';
-import * as aiController from '../controllers/ai.controller.js';
+const { Router } = require('express');
+const multer = require('multer');
+const { authenticate } = require('../middleware/auth.middleware.js');
+const aiController = require('../controllers/ai.controller.js');
 
 const router = Router();
 const upload = multer({
@@ -17,4 +17,4 @@ router.post('/generate-quotation', upload.any(), aiController.generateQuotation)
 router.post('/transcribe', upload.any(), aiController.transcribeOnly);
 router.post('/enhance-text', aiController.enhanceText);
 
-export default router;
+module.exports = router;

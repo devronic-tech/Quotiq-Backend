@@ -1,8 +1,8 @@
-import jwt from 'jsonwebtoken';
-import { UnauthorizedError } from '../utils/app-error.js';
-import { env } from '../config/env.js';
+const jwt = require('jsonwebtoken');
+const { UnauthorizedError } = require('../utils/app-error.js');
+const { env } = require('../config/env.js');
 
-export function authenticate(req, _res, next) {
+function authenticate(req, _res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
@@ -28,7 +28,7 @@ export function authenticate(req, _res, next) {
   }
 }
 
-export function optionalAuth(req, _res, next) {
+function optionalAuth(req, _res, next) {
   const authHeader = req.headers.authorization;
 
   if (authHeader?.startsWith('Bearer ')) {
@@ -46,3 +46,8 @@ export function optionalAuth(req, _res, next) {
 
   next();
 }
+
+module.exports = {
+  authenticate,
+  optionalAuth
+};

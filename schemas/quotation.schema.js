@@ -1,6 +1,6 @@
-import { z } from 'zod';
+const { z } = require('zod');
 
-export const lineItemSchema = z.object({
+const lineItemSchema = z.object({
   id: z.string().uuid().optional(),
   productId: z.string().uuid().optional().nullable(),
   serviceId: z.string().uuid().optional().nullable(),
@@ -12,12 +12,12 @@ export const lineItemSchema = z.object({
   tax: z.number().min(0).max(100).default(0),
 });
 
-export const sectionSchema = z.object({
+const sectionSchema = z.object({
   name: z.string().min(1, 'Section name is required').max(5000),
   items: z.array(lineItemSchema).min(1, 'At least one item is required in each section'),
 });
 
-export const createQuotationSchema = z.object({
+const createQuotationSchema = z.object({
   customerId: z.string().uuid('Invalid customer ID').optional().nullable(),
   customerName: z.string().min(1, 'Customer name is required').max(200).trim().optional(),
   departmentId: z.string().uuid('Invalid department ID').optional().nullable(),
@@ -33,4 +33,11 @@ export const createQuotationSchema = z.object({
   sections: z.array(sectionSchema).min(1, 'At least one section is required'),
 });
 
-export const updateQuotationSchema = createQuotationSchema.partial();
+const updateQuotationSchema = createQuotationSchema.partial();
+
+module.exports = {
+  lineItemSchema,
+  sectionSchema,
+  createQuotationSchema,
+  updateQuotationSchema
+};

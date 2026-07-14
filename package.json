@@ -2,10 +2,13 @@
   "name": "@quotation/api",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "node --watch server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "db:migrate": "node scripts/migrate.js",
+    "db:rollback": "node scripts/migrate.js --rollback",
+    "db:status": "node scripts/migrate.js --status",
+    "db:migration": "node scripts/make-migration.js"
   },
   "dependencies": {
     "@casl/ability": "^6.7.0",

@@ -1,13 +1,13 @@
-import { StatusCodes } from 'http-status-codes';
-import { sequelize } from '../config/database.js';
-import { Invoice, InvoiceItem, Payment, Quotation, QuotationSection, QuotationItem, Organization, Customer, Department } from '../models/index.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { NotFoundError } from '../utils/app-error.js';
+const { StatusCodes } = require('http-status-codes');
+const { sequelize } = require('../config/database.js');
+const { Invoice, InvoiceItem, Payment, Quotation, QuotationSection, QuotationItem, Organization, Customer, Department } = require('../models/index.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { NotFoundError } = require('../utils/app-error.js');
 
 /**
  * GET /api/v1/invoices
  */
-export const listInvoices = asyncHandler(async (req, res) => {
+const listInvoices = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const invoices = await Invoice.findAll({
     where: { tenantId },
@@ -27,7 +27,7 @@ export const listInvoices = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/invoices/:id
  */
-export const getInvoice = asyncHandler(async (req, res) => {
+const getInvoice = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -61,7 +61,7 @@ export const getInvoice = asyncHandler(async (req, res) => {
 /**
  * PATCH /api/v1/invoices/:id/status
  */
-export const patchInvoiceStatus = asyncHandler(async (req, res) => {
+const patchInvoiceStatus = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
   const { status } = req.body;
@@ -88,7 +88,7 @@ export const patchInvoiceStatus = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/invoices
  */
-export const createInvoice = asyncHandler(async (req, res) => {
+const createInvoice = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const input = req.body;
@@ -229,7 +229,7 @@ export const createInvoice = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/invoices/:id/payments
  */
-export const recordPayment = asyncHandler(async (req, res) => {
+const recordPayment = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
   const input = req.body;
@@ -304,7 +304,7 @@ export const recordPayment = asyncHandler(async (req, res) => {
 /**
  * DELETE /api/v1/invoices/:id
  */
-export const deleteInvoice = asyncHandler(async (req, res) => {
+const deleteInvoice = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -320,3 +320,12 @@ export const deleteInvoice = asyncHandler(async (req, res) => {
     message: 'Invoice deleted successfully',
   });
 });
+
+module.exports = {
+  listInvoices,
+  getInvoice,
+  patchInvoiceStatus,
+  createInvoice,
+  recordPayment,
+  deleteInvoice
+};

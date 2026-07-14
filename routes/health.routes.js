@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import { sequelize } from '../config/database.js';
+const { Router } = require('express');
+const { StatusCodes } = require('http-status-codes');
+const { sequelize } = require('../config/database.js');
 
 const router = Router();
 
@@ -51,4 +51,4 @@ router.get('/live', (_req, res) => {
   });
 });
 
-export default router;
+module.exports = router;

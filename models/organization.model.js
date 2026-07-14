@@ -1,7 +1,7 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database.js');
 
-export class Organization extends Model {}
+class Organization extends Model {}
 
 Organization.init(
   {
@@ -110,10 +110,15 @@ Organization.init(
   }
 );
 
-export function generateSlug(name) {
+function generateSlug(name) {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .substring(0, 50);
 }
+
+module.exports = {
+  Organization,
+  generateSlug
+};

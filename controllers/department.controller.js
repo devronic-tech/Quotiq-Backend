@@ -1,12 +1,12 @@
-import { StatusCodes } from 'http-status-codes';
-import { Department } from '../models/index.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { NotFoundError } from '../utils/app-error.js';
+const { StatusCodes } = require('http-status-codes');
+const { Department } = require('../models/index.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { NotFoundError } = require('../utils/app-error.js');
 
 /**
  * GET /api/v1/departments
  */
-export const listDepartments = asyncHandler(async (req, res) => {
+const listDepartments = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
 
@@ -52,7 +52,7 @@ export const listDepartments = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/departments
  */
-export const createDepartment = asyncHandler(async (req, res) => {
+const createDepartment = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const { name } = req.body;
@@ -73,7 +73,7 @@ export const createDepartment = asyncHandler(async (req, res) => {
 /**
  * PUT /api/v1/departments/:id
  */
-export const updateDepartment = asyncHandler(async (req, res) => {
+const updateDepartment = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const { id } = req.params;
@@ -96,7 +96,7 @@ export const updateDepartment = asyncHandler(async (req, res) => {
 /**
  * DELETE /api/v1/departments/:id
  */
-export const deleteDepartment = asyncHandler(async (req, res) => {
+const deleteDepartment = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -112,3 +112,10 @@ export const deleteDepartment = asyncHandler(async (req, res) => {
     message: 'Department deleted successfully',
   });
 });
+
+module.exports = {
+  listDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment
+};

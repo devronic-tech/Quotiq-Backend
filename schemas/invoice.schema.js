@@ -1,4 +1,4 @@
-import { z } from 'zod';
+const { z } = require('zod');
 
 const invoiceItemSchema = z.object({
   description: z.string().min(1, 'Item description is required'),
@@ -9,7 +9,7 @@ const invoiceItemSchema = z.object({
   tax: z.coerce.number().min(0).max(100).optional().default(0),
 });
 
-export const invoiceSchema = z.object({
+const invoiceSchema = z.object({
   quotationId: z.string().uuid().optional().nullable(),
   customerId: z.string().uuid().optional().nullable(),
   type: z.enum(['tax', 'proforma', 'commercial', 'credit_note', 'debit_note']).default('tax'),
@@ -23,10 +23,15 @@ export const invoiceSchema = z.object({
   path: ["_root"],
 });
 
-export const recordPaymentSchema = z.object({
+const recordPaymentSchema = z.object({
   amount: z.coerce.number().positive('Payment amount must be positive'),
   paymentDate: z.string().datetime().optional(),
   paymentMethod: z.enum(['cash', 'bank_transfer', 'cheque', 'card', 'upi']),
   transactionReference: z.string().max(100).trim().optional(),
   notes: z.string().trim().optional(),
 });
+
+module.exports = {
+  invoiceSchema,
+  recordPaymentSchema
+};

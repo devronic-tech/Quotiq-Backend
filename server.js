@@ -1,8 +1,8 @@
-import 'dotenv/config';
-import { env } from './config/env.js';
-import { connectDatabase, disconnectDatabase } from './config/database.js';
-import { logger } from './utils/logger.js';
-import app from './app.js';
+require('dotenv').config();
+const { env } = require('./config/env.js');
+const { connectDatabase, disconnectDatabase } = require('./config/database.js');
+const { logger } = require('./utils/logger.js');
+const app = require('./app.js');
 
 const PORT = env.PORT;
 

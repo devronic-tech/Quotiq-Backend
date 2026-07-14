@@ -1,5 +1,9 @@
-import { z } from 'zod';
+const { z } = require('zod');
 
-export const departmentSchema = z.object({
+const departmentSchema = z.object({
   name: z.string().min(2, 'Department name must be at least 2 characters').max(100).trim(),
 });
+
+module.exports = {
+  departmentSchema
+};

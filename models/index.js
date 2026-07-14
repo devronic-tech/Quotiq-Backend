@@ -1,25 +1,26 @@
-import { Organization } from './organization.model.js';
-import { User, Role } from './user.model.js';
-import { RefreshToken } from './refresh-token.model.js';
-import { Department } from './department.model.js';
-import { Customer } from './customer.model.js';
-import { CustomerAddress } from './customer-address.model.js';
-import { Product } from './product.model.js';
-import { Service } from './service.model.js';
-import { Quotation } from './quotation.model.js';
-import { QuotationSection } from './quotation-section.model.js';
-import { QuotationItem } from './quotation-item.model.js';
-import { Invoice } from './invoice.model.js';
-import { InvoiceItem } from './invoice-item.model.js';
-import { Payment } from './payment.model.js';
-import { OfferLetter } from './offer-letter.model.js';
-import { Expense } from './expense.model.js';
-import { Liability } from './liability.model.js';
-import { Subscription } from './subscription.model.js';
-import { Payroll } from './payroll.model.js';
-import { Transaction } from './transaction.model.js';
+const { Organization } = require('./organization.model.js');
+const { User, Role } = require('./user.model.js');
+const { RefreshToken } = require('./refresh-token.model.js');
+const { Department } = require('./department.model.js');
+const { Customer } = require('./customer.model.js');
+const { CustomerAddress } = require('./customer-address.model.js');
+const { Product } = require('./product.model.js');
+const { Service } = require('./service.model.js');
+const { Quotation } = require('./quotation.model.js');
+const { QuotationSection } = require('./quotation-section.model.js');
+const { QuotationItem } = require('./quotation-item.model.js');
+const { Invoice } = require('./invoice.model.js');
+const { InvoiceItem } = require('./invoice-item.model.js');
+const { Payment } = require('./payment.model.js');
+const { OfferLetter } = require('./offer-letter.model.js');
+const { Expense } = require('./expense.model.js');
+const { Liability } = require('./liability.model.js');
+const { Subscription } = require('./subscription.model.js');
+const { Payroll } = require('./payroll.model.js');
+const { Transaction } = require('./transaction.model.js');
+const { OtpVerification } = require('./otp-verification.model.js');
 
-export function registerAssociations() {
+function registerAssociations() {
   // Organization ↔ User
   Organization.hasMany(User, {
     foreignKey: 'tenantId',
@@ -301,7 +302,8 @@ export function registerAssociations() {
   });
 }
 
-export {
+module.exports = {
+  registerAssociations,
   Organization,
   User,
   Role,
@@ -323,4 +325,5 @@ export {
   Subscription,
   Payroll,
   Transaction,
+  OtpVerification,
 };

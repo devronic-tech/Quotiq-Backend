@@ -1,12 +1,12 @@
-import { StatusCodes } from 'http-status-codes';
-import { Service } from '../models/index.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { NotFoundError } from '../utils/app-error.js';
+const { StatusCodes } = require('http-status-codes');
+const { Service } = require('../models/index.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { NotFoundError } = require('../utils/app-error.js');
 
 /**
  * GET /api/v1/services
  */
-export const listServices = asyncHandler(async (req, res) => {
+const listServices = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const services = await Service.findAll({
     where: { tenantId },
@@ -22,7 +22,7 @@ export const listServices = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/services/:id
  */
-export const getService = asyncHandler(async (req, res) => {
+const getService = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -40,7 +40,7 @@ export const getService = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/services
  */
-export const createService = asyncHandler(async (req, res) => {
+const createService = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const { name, sac, category, price, gstRate, description } = req.body;
@@ -66,7 +66,7 @@ export const createService = asyncHandler(async (req, res) => {
 /**
  * PUT /api/v1/services/:id
  */
-export const updateService = asyncHandler(async (req, res) => {
+const updateService = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const { id } = req.params;
@@ -97,7 +97,7 @@ export const updateService = asyncHandler(async (req, res) => {
 /**
  * DELETE /api/v1/services/:id
  */
-export const deleteService = asyncHandler(async (req, res) => {
+const deleteService = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -113,3 +113,11 @@ export const deleteService = asyncHandler(async (req, res) => {
     message: 'Service deleted successfully',
   });
 });
+
+module.exports = {
+  listServices,
+  getService,
+  createService,
+  updateService,
+  deleteService
+};

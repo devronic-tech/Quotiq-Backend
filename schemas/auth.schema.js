@@ -1,4 +1,4 @@
-import { z } from 'zod';
+const { z } = require('zod');
 
 const passwordSchema = z
   .string()
@@ -9,29 +9,42 @@ const passwordSchema = z
   .regex(/[0-9]/, 'Password must contain at least one number')
   .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
 
-export const registerSchema = z.object({
+const registerSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50).trim(),
   lastName: z.string().min(1, 'Last name is required').max(50).trim(),
   email: z.string().email('Invalid email address').toLowerCase().trim(),
   password: passwordSchema,
   confirmPassword: z.string(),
   organizationName: z.string().min(2, 'Organization name is required').max(100).trim(),
+  verificationToken: z.string().min(1, 'Email verification token is required'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
 });
 
-export const loginSchema = z.object({
+const loginSchema = z.object({
   email: z.string().email('Invalid email address').toLowerCase().trim(),
   password: z.string().min(1, 'Password is required'),
 });
 
-export const forgotPasswordSchema = z.object({
+const sendOtpSchema = z.object({
+  email: z.string().email('Invalid email address').toLowerCase().trim(),
+  type: z.enum(['login', 'signup', 'forgot_password']),
+});
+
+const verifyOtpSchema = z.object({
+  email: z.string().email('Invalid email address').toLowerCase().trim(),
+  type: z.enum(['login', 'signup', 'forgot_password']),
+  otp: z.string().length(6, 'OTP must be exactly 6 digits'),
+});
+
+const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address').toLowerCase().trim(),
 });
 
-export const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
+const resetPasswordSchema = z.object({
+  email: z.string().email('Invalid email address').toLowerCase().trim(),
+  otp: z.string().length(6, 'OTP must be exactly 6 digits'),
   password: passwordSchema,
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -39,7 +52,7 @@ export const resetPasswordSchema = z.object({
   path: ['confirmPassword'],
 });
 
-export const changePasswordSchema = z.object({
+const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
   newPassword: passwordSchema,
   confirmNewPassword: z.string(),
@@ -48,6 +61,17 @@ export const changePasswordSchema = z.object({
   path: ['confirmNewPassword'],
 });
 
-export const refreshTokenSchema = z.object({
+const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 });
+
+module.exports = {
+  registerSchema,
+  loginSchema,
+  sendOtpSchema,
+  verifyOtpSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
+  refreshTokenSchema
+};

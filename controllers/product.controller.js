@@ -1,12 +1,12 @@
-import { StatusCodes } from 'http-status-codes';
-import { Product } from '../models/index.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { NotFoundError } from '../utils/app-error.js';
+const { StatusCodes } = require('http-status-codes');
+const { Product } = require('../models/index.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { NotFoundError } = require('../utils/app-error.js');
 
 /**
  * GET /api/v1/products
  */
-export const listProducts = asyncHandler(async (req, res) => {
+const listProducts = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const products = await Product.findAll({
     where: { tenantId },
@@ -22,7 +22,7 @@ export const listProducts = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/products/:id
  */
-export const getProduct = asyncHandler(async (req, res) => {
+const getProduct = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -40,7 +40,7 @@ export const getProduct = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/products
  */
-export const createProduct = asyncHandler(async (req, res) => {
+const createProduct = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const { name, sku, hsn, category, price, gstRate, description } = req.body;
@@ -67,7 +67,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 /**
  * PUT /api/v1/products/:id
  */
-export const updateProduct = asyncHandler(async (req, res) => {
+const updateProduct = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const { id } = req.params;
@@ -99,7 +99,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
 /**
  * DELETE /api/v1/products/:id
  */
-export const deleteProduct = asyncHandler(async (req, res) => {
+const deleteProduct = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -115,3 +115,11 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     message: 'Product deleted successfully',
   });
 });
+
+module.exports = {
+  listProducts,
+  getProduct,
+  createProduct,
+  updateProduct,
+  deleteProduct
+};

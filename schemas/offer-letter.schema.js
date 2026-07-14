@@ -1,6 +1,6 @@
-import { z } from 'zod';
+const { z } = require('zod');
 
-export const createOfferSchema = z.object({
+const createOfferSchema = z.object({
   candidateName: z.string().min(1, 'Candidate name is required').max(100),
   candidateEmail: z.string().min(1, 'Candidate email is required').email('Invalid email address').max(255),
   candidatePhone: z.string().max(50).optional().nullable(),
@@ -16,4 +16,9 @@ export const createOfferSchema = z.object({
   letterContent: z.string().min(1, 'Letter content is required'),
 });
 
-export const updateOfferSchema = createOfferSchema.partial();
+const updateOfferSchema = createOfferSchema.partial();
+
+module.exports = {
+  createOfferSchema,
+  updateOfferSchema
+};

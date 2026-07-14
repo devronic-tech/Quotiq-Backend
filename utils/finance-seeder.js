@@ -1,7 +1,7 @@
-import { Expense, Liability, Subscription, Payroll, Transaction } from '../models/index.js';
-import { logger } from './logger.js';
+const { Expense, Liability, Subscription, Payroll, Transaction } = require('../models/index.js');
+const { logger } = require('./logger.js');
 
-export async function seedFinanceData(tenantId) {
+async function seedFinanceData(tenantId) {
   try {
     // Check if data already exists for this tenant
     const expenseCount = await Expense.count({ where: { tenantId } });
@@ -98,3 +98,7 @@ export async function seedFinanceData(tenantId) {
     logger.error({ error }, '❌ Failed to seed finance database records');
   }
 }
+
+module.exports = {
+  seedFinanceData
+};

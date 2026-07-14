@@ -1,11 +1,16 @@
-import { StatusCodes } from 'http-status-codes';
-import { sequelize } from '../config/database.js';
-import { User, Organization, RefreshToken, Role } from '../models/index.js';
-import { generateSlug } from '../models/organization.model.js';
-import { generateTokens, hashToken, verifyRefreshToken } from '../utils/token.js';
-import { ConflictError, NotFoundError, ValidationError, UnauthorizedError } from '../utils/app-error.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { logger } from '../utils/logger.js';
+const { StatusCodes } = require('http-status-codes');
+const { sequelize } = require('../config/database.js');
+const { User, Organization, RefreshToken, Role, OtpVerification } = require('../models/index.js');
+const { generateSlug } = require('../models/organization.model.js');
+const { generateTokens, hashToken, verifyRefreshToken } = require('../utils/token.js');
+const { ConflictError, NotFoundError, ValidationError, UnauthorizedError } = require('../utils/app-error.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { logger } = require('../utils/logger.js');
+const { sendOTPEmail } = require('../utils/email.js');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const { env } = require('../config/env.js');
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCK_DURATION_MS = 15 * 60 * 1000;
@@ -14,8 +19,19 @@ const MAX_SESSIONS = 5;
 /**
  * POST /api/auth/register
  */
-export const register = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email, password, organizationName } = req.body;
+const register = asyncHandler(async (req, res) => {
+  const { firstName, lastName, email, password, organizationName, verificationToken } = req.body;
+
+  let decoded;
+  try {
+    decoded = jwt.verify(verificationToken, env.JWT_SECRET);
+  } catch (err) {
+    throw new UnauthorizedError('Invalid or expired email verification token. Please verify your OTP again.');
+  }
+
+  if (decoded.email !== email || decoded.type !== 'signup' || !decoded.verified) {
+    throw new UnauthorizedError('Verification token does not match register details');
+  }
 
   const existingUser = await User.findOne({ where: { email } });
   if (existingUser) {
@@ -70,6 +86,9 @@ export const register = asyncHandler(async (req, res) => {
     return { user, organization, tokens };
   });
 
+  // Clean up verified OTP record
+  await OtpVerification.destroy({ where: { email, type: 'signup' } });
+
   logger.info({ userId: result.user.id, orgId: result.organization.id }, 'New organization registered');
 
   res.status(StatusCodes.CREATED).json({
@@ -100,7 +119,7 @@ export const register = asyncHandler(async (req, res) => {
 /**
  * POST /api/auth/login
  */
-export const login = asyncHandler(async (req, res) => {
+const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ where: { email, isActive: true } });
@@ -135,72 +154,44 @@ export const login = asyncHandler(async (req, res) => {
   await user.update({
     failedLoginAttempts: 0,
     lockUntil: null,
-    lastLoginAt: new Date(),
   });
 
-  const tokens = generateTokens({
-    userId: user.id,
-    email: user.email,
-    role: user.role,
-    tenantId: user.tenantId,
+  // Generate and send Login OTP
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  const salt = await bcrypt.genSalt(10);
+  const hashedOtp = await bcrypt.hash(otp, salt);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Delete existing login OTPs
+  await OtpVerification.destroy({ where: { email, type: 'login' } });
+
+  // Save OTP to database
+  await OtpVerification.create({
+    email,
+    otp: hashedOtp,
+    type: 'login',
+    expiresAt,
   });
 
-  await RefreshToken.create({
-    userId: user.id,
-    hashedToken: hashToken(tokens.refreshToken),
-    device: 'web',
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days expiry matching JWT refresh setting
-  });
+  // Send OTP email
+  await sendOTPEmail(email, otp, 'login');
 
-  const allTokens = await RefreshToken.findAll({
-    where: { userId: user.id },
-    order: [['createdAt', 'ASC']],
-  });
-
-  const now = new Date();
-  const validTokens = allTokens.filter((t) => t.expiresAt > now);
-  const toDelete = [
-    ...allTokens.filter((t) => t.expiresAt <= now),
-    ...validTokens.slice(0, Math.max(0, validTokens.length - MAX_SESSIONS)),
-  ];
-
-  if (toDelete.length > 0) {
-    await RefreshToken.destroy({
-      where: { id: toDelete.map((t) => t.id) },
-    });
-  }
-
-  logger.info({ userId: user.id }, 'User logged in');
+  logger.info({ userId: user.id, email }, 'Login OTP sent');
 
   res.status(StatusCodes.OK).json({
     success: true,
     data: {
-      user: {
-        _id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        tenantId: user.tenantId,
-        isActive: user.isActive,
-        isEmailVerified: user.isEmailVerified,
-        lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
-        createdAt: user.createdAt.toISOString(),
-      },
-      tokens: {
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        expiresIn: tokens.expiresIn,
-      },
+      otpRequired: true,
+      email,
     },
-    message: 'Login successful',
+    message: 'Verification code sent to your email',
   });
 });
 
 /**
  * POST /api/auth/refresh-token
  */
-export const refreshToken = asyncHandler(async (req, res) => {
+const refreshToken = asyncHandler(async (req, res) => {
   const { refreshToken: token } = req.body;
 
   if (!token) {
@@ -263,7 +254,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
 /**
  * POST /api/auth/logout
  */
-export const logout = asyncHandler(async (req, res) => {
+const logout = asyncHandler(async (req, res) => {
   const { refreshToken: token } = req.body;
 
   if (req.user && token) {
@@ -283,7 +274,7 @@ export const logout = asyncHandler(async (req, res) => {
 /**
  * GET /api/auth/profile
  */
-export const getProfile = asyncHandler(async (req, res) => {
+const getProfile = asyncHandler(async (req, res) => {
   const user = await User.findByPk(req.user.userId);
 
   if (!user) {
@@ -297,3 +288,241 @@ export const getProfile = asyncHandler(async (req, res) => {
     },
   });
 });
+
+/**
+ * POST /api/auth/send-otp
+ */
+const sendOtp = asyncHandler(async (req, res) => {
+  const { email, type } = req.body;
+
+  if (type === 'signup') {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      throw new ConflictError('An account with this email already exists');
+    }
+  } else if (type === 'login' || type === 'forgot_password') {
+    const existingUser = await User.findOne({ where: { email, isActive: true } });
+    if (!existingUser) {
+      throw new NotFoundError('No account found with this email');
+    }
+  }
+
+  // Delete existing OTPs
+  await OtpVerification.destroy({ where: { email, type } });
+
+  // Generate 6-digit OTP
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  const salt = await bcrypt.genSalt(10);
+  const hashedOtp = await bcrypt.hash(otp, salt);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Save OTP to database
+  await OtpVerification.create({
+    email,
+    otp: hashedOtp,
+    type,
+    expiresAt,
+  });
+
+  // Send OTP email
+  await sendOTPEmail(email, otp, type);
+
+  logger.info({ email, type }, 'OTP sent successfully');
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Verification code sent to your email',
+  });
+});
+
+/**
+ * POST /api/auth/verify-otp
+ */
+const verifyOtp = asyncHandler(async (req, res) => {
+  const { email, otp, type } = req.body;
+
+  const otpRecord = await OtpVerification.findOne({
+    where: { email, type, verified: false },
+    order: [['createdAt', 'DESC']],
+  });
+
+  if (!otpRecord) {
+    throw new ValidationError('No OTP request found. Please request a new OTP.');
+  }
+
+  if (new Date() > otpRecord.expiresAt) {
+    await otpRecord.destroy();
+    throw new ValidationError('OTP has expired. Please request a new one.');
+  }
+
+  const isMatch = await bcrypt.compare(otp, otpRecord.otp);
+  if (!isMatch) {
+    const attempts = otpRecord.attempts + 1;
+    if (attempts >= 3) {
+      await otpRecord.destroy();
+      throw new ValidationError('Too many incorrect attempts. Please request a new OTP.');
+    } else {
+      await otpRecord.update({ attempts });
+      throw new ValidationError(`Invalid OTP. Please try again. (${3 - attempts} attempts remaining)`);
+    }
+  }
+
+  // Mark as verified
+  await otpRecord.update({ verified: true });
+
+  if (type === 'login') {
+    const user = await User.findOne({ where: { email, isActive: true } });
+    if (!user) {
+      throw new UnauthorizedError('User not found or inactive');
+    }
+
+    await user.update({ lastLoginAt: new Date() });
+
+    const tokens = generateTokens({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenantId,
+    });
+
+    await RefreshToken.create({
+      userId: user.id,
+      hashedToken: hashToken(tokens.refreshToken),
+      device: 'web',
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    });
+
+    // Delete verified OTP record
+    await otpRecord.destroy();
+
+    logger.info({ userId: user.id }, 'User logged in via OTP');
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        user: user.toPublicJSON(),
+        tokens,
+      },
+      message: 'Login successful',
+    });
+  } else {
+    // Generate signup or reset temporary token
+    const verificationToken = jwt.sign(
+      { email, type, verified: true },
+      env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        verificationToken,
+      },
+      message: 'OTP verified successfully',
+    });
+  }
+});
+
+/**
+ * POST /api/auth/forgot-password
+ */
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ where: { email, isActive: true } });
+  if (!user) {
+    throw new NotFoundError('No account found with this email');
+  }
+
+  // Delete existing password reset OTPs
+  await OtpVerification.destroy({ where: { email, type: 'forgot_password' } });
+
+  // Generate OTP
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  const salt = await bcrypt.genSalt(10);
+  const hashedOtp = await bcrypt.hash(otp, salt);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Save to database
+  await OtpVerification.create({
+    email,
+    otp: hashedOtp,
+    type: 'forgot_password',
+    expiresAt,
+  });
+
+  // Send email
+  await sendOTPEmail(email, otp, 'forgot_password');
+
+  logger.info({ email }, 'Password reset OTP sent');
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Verification code sent to your email',
+  });
+});
+
+/**
+ * POST /api/auth/reset-password
+ */
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, otp, password } = req.body;
+
+  const otpRecord = await OtpVerification.findOne({
+    where: { email, type: 'forgot_password', verified: false },
+    order: [['createdAt', 'DESC']],
+  });
+
+  if (!otpRecord) {
+    throw new ValidationError('No OTP request found. Please request a new OTP.');
+  }
+
+  if (new Date() > otpRecord.expiresAt) {
+    await otpRecord.destroy();
+    throw new ValidationError('OTP has expired. Please request a new one.');
+  }
+
+  const isMatch = await bcrypt.compare(otp, otpRecord.otp);
+  if (!isMatch) {
+    const attempts = otpRecord.attempts + 1;
+    if (attempts >= 3) {
+      await otpRecord.destroy();
+      throw new ValidationError('Too many incorrect attempts. Please request a new OTP.');
+    } else {
+      await otpRecord.update({ attempts });
+      throw new ValidationError(`Invalid OTP. Please try again. (${3 - attempts} attempts remaining)`);
+    }
+  }
+
+  // OTP verified successfully, let's update password
+  const user = await User.findOne({ where: { email, isActive: true } });
+  if (!user) {
+    throw new NotFoundError('User');
+  }
+
+  // Update password (hooks will trigger hashing automatically)
+  user.password = password;
+  await user.save();
+
+  // Delete the OTP verification record
+  await otpRecord.destroy();
+
+  logger.info({ userId: user.id }, 'Password reset completed');
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Password reset successful. You can now login with your new password.',
+  });
+});
+
+module.exports = {
+  register,
+  login,
+  refreshToken,
+  logout,
+  getProfile,
+  sendOtp,
+  verifyOtp,
+  forgotPassword,
+  resetPassword,
+};

@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import { invoiceSchema, recordPaymentSchema } from '../schemas/invoice.schema.js';
-import { validate } from '../middleware/validate.middleware.js';
-import { authenticate } from '../middleware/auth.middleware.js';
-import * as invoiceController from '../controllers/invoice.controller.js';
+const { Router } = require('express');
+const { invoiceSchema, recordPaymentSchema } = require('../schemas/invoice.schema.js');
+const { validate } = require('../middleware/validate.middleware.js');
+const { authenticate } = require('../middleware/auth.middleware.js');
+const invoiceController = require('../controllers/invoice.controller.js');
 
 const router = Router();
 
@@ -15,4 +15,4 @@ router.patch('/:id/status', invoiceController.patchInvoiceStatus);
 router.post('/:id/payments', validate({ body: recordPaymentSchema }), invoiceController.recordPayment);
 router.delete('/:id', invoiceController.deleteInvoice);
 
-export default router;
+module.exports = router;

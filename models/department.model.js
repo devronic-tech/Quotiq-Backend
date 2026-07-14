@@ -1,7 +1,7 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database.js');
 
-export class Department extends Model {}
+class Department extends Model {}
 
 Department.init(
   {
@@ -41,3 +41,7 @@ Department.init(
     timestamps: true,
   }
 );
+
+module.exports = {
+  Department
+};

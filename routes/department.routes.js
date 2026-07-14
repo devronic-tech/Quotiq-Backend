@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import { departmentSchema } from '../schemas/department.schema.js';
-import { validate } from '../middleware/validate.middleware.js';
-import { authenticate } from '../middleware/auth.middleware.js';
-import * as departmentController from '../controllers/department.controller.js';
+const { Router } = require('express');
+const { departmentSchema } = require('../schemas/department.schema.js');
+const { validate } = require('../middleware/validate.middleware.js');
+const { authenticate } = require('../middleware/auth.middleware.js');
+const departmentController = require('../controllers/department.controller.js');
 
 const router = Router();
 
@@ -13,4 +13,4 @@ router.post('/', validate({ body: departmentSchema }), departmentController.crea
 router.put('/:id', validate({ body: departmentSchema }), departmentController.updateDepartment);
 router.delete('/:id', departmentController.deleteDepartment);
 
-export default router;
+module.exports = router;

@@ -1,13 +1,13 @@
-import { StatusCodes } from 'http-status-codes';
-import { sequelize } from '../config/database.js';
-import { Customer, CustomerAddress, Department } from '../models/index.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { NotFoundError } from '../utils/app-error.js';
+const { StatusCodes } = require('http-status-codes');
+const { sequelize } = require('../config/database.js');
+const { Customer, CustomerAddress, Department } = require('../models/index.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { NotFoundError } = require('../utils/app-error.js');
 
 /**
  * GET /api/v1/customers
  */
-export const listCustomers = asyncHandler(async (req, res) => {
+const listCustomers = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const customers = await Customer.findAll({
     where: { tenantId },
@@ -27,7 +27,7 @@ export const listCustomers = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/customers/:id
  */
-export const getCustomer = asyncHandler(async (req, res) => {
+const getCustomer = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -52,7 +52,7 @@ export const getCustomer = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/customers
  */
-export const createCustomer = asyncHandler(async (req, res) => {
+const createCustomer = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const input = req.body;
@@ -110,7 +110,7 @@ export const createCustomer = asyncHandler(async (req, res) => {
 /**
  * PUT /api/v1/customers/:id
  */
-export const updateCustomer = asyncHandler(async (req, res) => {
+const updateCustomer = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const { id } = req.params;
@@ -178,7 +178,7 @@ export const updateCustomer = asyncHandler(async (req, res) => {
 /**
  * DELETE /api/v1/customers/:id
  */
-export const deleteCustomer = asyncHandler(async (req, res) => {
+const deleteCustomer = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -194,3 +194,11 @@ export const deleteCustomer = asyncHandler(async (req, res) => {
     message: 'Customer deleted successfully',
   });
 });
+
+module.exports = {
+  listCustomers,
+  getCustomer,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer
+};

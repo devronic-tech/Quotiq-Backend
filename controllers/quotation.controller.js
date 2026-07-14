@@ -1,13 +1,13 @@
-import { StatusCodes } from 'http-status-codes';
-import { sequelize } from '../config/database.js';
-import { Quotation, QuotationSection, QuotationItem, Organization, Customer, Department } from '../models/index.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { NotFoundError } from '../utils/app-error.js';
+const { StatusCodes } = require('http-status-codes');
+const { sequelize } = require('../config/database.js');
+const { Quotation, QuotationSection, QuotationItem, Organization, Customer, Department } = require('../models/index.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { NotFoundError } = require('../utils/app-error.js');
 
 /**
  * GET /api/v1/quotations
  */
-export const listQuotations = asyncHandler(async (req, res) => {
+const listQuotations = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const quotations = await Quotation.findAll({
     where: { tenantId },
@@ -27,7 +27,7 @@ export const listQuotations = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/quotations/:id
  */
-export const getQuotation = asyncHandler(async (req, res) => {
+const getQuotation = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -61,7 +61,7 @@ export const getQuotation = asyncHandler(async (req, res) => {
 /**
  * PATCH /api/v1/quotations/:id/status
  */
-export const patchQuotationStatus = asyncHandler(async (req, res) => {
+const patchQuotationStatus = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
   const { status } = req.body;
@@ -88,7 +88,7 @@ export const patchQuotationStatus = asyncHandler(async (req, res) => {
 /**
  * POST /api/v1/quotations
  */
-export const createQuotation = asyncHandler(async (req, res) => {
+const createQuotation = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const input = req.body;
@@ -240,7 +240,7 @@ export const createQuotation = asyncHandler(async (req, res) => {
 /**
  * PUT /api/v1/quotations/:id
  */
-export const updateQuotation = asyncHandler(async (req, res) => {
+const updateQuotation = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const userId = req.user?.userId;
   const { id } = req.params;
@@ -356,7 +356,7 @@ export const updateQuotation = asyncHandler(async (req, res) => {
 /**
  * DELETE /api/v1/quotations/:id
  */
-export const deleteQuotation = asyncHandler(async (req, res) => {
+const deleteQuotation = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -372,3 +372,12 @@ export const deleteQuotation = asyncHandler(async (req, res) => {
     message: 'Quotation deleted successfully',
   });
 });
+
+module.exports = {
+  listQuotations,
+  getQuotation,
+  patchQuotationStatus,
+  createQuotation,
+  updateQuotation,
+  deleteQuotation
+};

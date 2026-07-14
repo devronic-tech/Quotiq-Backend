@@ -1,26 +1,16 @@
-import { StatusCodes } from 'http-status-codes';
-import { Op } from 'sequelize';
-import { 
-  Expense, 
-  Liability, 
-  Subscription, 
-  Payroll, 
-  Transaction, 
-  Invoice, 
-  Customer, 
-  Payment,
-  Quotation
-} from '../models/index.js';
-import { asyncHandler } from '../utils/async-handler.js';
-import { ValidationError, NotFoundError } from '../utils/app-error.js';
-import { seedFinanceData } from '../utils/finance-seeder.js';
-import { env } from '../config/env.js';
-import { logger } from '../utils/logger.js';
+const { StatusCodes } = require('http-status-codes');
+const { Op } = require('sequelize');
+const { Expense, Liability, Subscription, Payroll, Transaction, Invoice, Customer, Payment, Quotation } = require('../models/index.js');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { ValidationError, NotFoundError } = require('../utils/app-error.js');
+const { seedFinanceData } = require('../utils/finance-seeder.js');
+const { env } = require('../config/env.js');
+const { logger } = require('../utils/logger.js');
 
 /**
  * Trigger Seeding manually
  */
-export const triggerSeed = asyncHandler(async (req, res) => {
+const triggerSeed = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   await seedFinanceData(tenantId);
   res.status(StatusCodes.OK).json({
@@ -32,7 +22,7 @@ export const triggerSeed = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/finance/summary
  */
-export const getFinanceSummary = asyncHandler(async (req, res) => {
+const getFinanceSummary = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
 
   // 1. Calculate Incomes vs Expenses from ledger and client invoices (cash basis)
@@ -269,7 +259,7 @@ export const getFinanceSummary = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/finance/cashflow
  */
-export const getCashFlowHistory = asyncHandler(async (req, res) => {
+const getCashFlowHistory = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { range = '30D' } = req.query; // 7D, 30D, 3M, 6M, 1Y
 
@@ -355,7 +345,7 @@ export const getCashFlowHistory = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/finance/sankey
  */
-export const getSankeyData = asyncHandler(async (req, res) => {
+const getSankeyData = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
 
   const expenses = await Expense.findAll({ where: { tenantId } });
@@ -415,7 +405,7 @@ export const getSankeyData = asyncHandler(async (req, res) => {
 /**
  * GET /api/v1/finance/calendar
  */
-export const getFinancialCalendarEvents = asyncHandler(async (req, res) => {
+const getFinancialCalendarEvents = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
 
   const liabilities = await Liability.findAll({ where: { tenantId, status: 'pending' } });
@@ -466,7 +456,7 @@ export const getFinancialCalendarEvents = asyncHandler(async (req, res) => {
 /**
  * AI Financial Copilot conversational assistant using Groq
  */
-export const getCopilotResponse = asyncHandler(async (req, res) => {
+const getCopilotResponse = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { question } = req.body;
 
@@ -584,7 +574,7 @@ ${contextString}`
 
 // ── EXPENSE CRUD ─────────────────────────────────────────────
 
-export const listExpenses = asyncHandler(async (req, res) => {
+const listExpenses = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { category, search, page = 1, limit = 10 } = req.query;
 
@@ -617,7 +607,7 @@ export const listExpenses = asyncHandler(async (req, res) => {
   });
 });
 
-export const createExpense = asyncHandler(async (req, res) => {
+const createExpense = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const input = req.body;
 
@@ -645,7 +635,7 @@ export const createExpense = asyncHandler(async (req, res) => {
   });
 });
 
-export const updateExpense = asyncHandler(async (req, res) => {
+const updateExpense = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
   const input = req.body;
@@ -674,7 +664,7 @@ export const updateExpense = asyncHandler(async (req, res) => {
   });
 });
 
-export const deleteExpense = asyncHandler(async (req, res) => {
+const deleteExpense = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -692,7 +682,7 @@ export const deleteExpense = asyncHandler(async (req, res) => {
 
 // ── LIABILITY CRUD ───────────────────────────────────────────
 
-export const listLiabilities = asyncHandler(async (req, res) => {
+const listLiabilities = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const liabilities = await Liability.findAll({
     where: { tenantId },
@@ -705,7 +695,7 @@ export const listLiabilities = asyncHandler(async (req, res) => {
   });
 });
 
-export const createLiability = asyncHandler(async (req, res) => {
+const createLiability = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const input = req.body;
 
@@ -721,7 +711,7 @@ export const createLiability = asyncHandler(async (req, res) => {
   });
 });
 
-export const updateLiability = asyncHandler(async (req, res) => {
+const updateLiability = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
   const input = req.body;
@@ -755,7 +745,7 @@ export const updateLiability = asyncHandler(async (req, res) => {
   });
 });
 
-export const deleteLiability = asyncHandler(async (req, res) => {
+const deleteLiability = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -773,7 +763,7 @@ export const deleteLiability = asyncHandler(async (req, res) => {
 
 // ── SUBSCRIPTION CRUD ────────────────────────────────────────
 
-export const listSubscriptions = asyncHandler(async (req, res) => {
+const listSubscriptions = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const subs = await Subscription.findAll({
     where: { tenantId },
@@ -786,7 +776,7 @@ export const listSubscriptions = asyncHandler(async (req, res) => {
   });
 });
 
-export const createSubscription = asyncHandler(async (req, res) => {
+const createSubscription = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const input = req.body;
 
@@ -802,7 +792,7 @@ export const createSubscription = asyncHandler(async (req, res) => {
   });
 });
 
-export const updateSubscription = asyncHandler(async (req, res) => {
+const updateSubscription = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
   const input = req.body;
@@ -819,7 +809,7 @@ export const updateSubscription = asyncHandler(async (req, res) => {
   });
 });
 
-export const deleteSubscription = asyncHandler(async (req, res) => {
+const deleteSubscription = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -836,7 +826,7 @@ export const deleteSubscription = asyncHandler(async (req, res) => {
 
 // ── PAYROLL CRUD ─────────────────────────────────────────────
 
-export const listPayroll = asyncHandler(async (req, res) => {
+const listPayroll = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const payrollList = await Payroll.findAll({
     where: { tenantId },
@@ -849,7 +839,7 @@ export const listPayroll = asyncHandler(async (req, res) => {
   });
 });
 
-export const createPayroll = asyncHandler(async (req, res) => {
+const createPayroll = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const input = req.body;
 
@@ -865,7 +855,7 @@ export const createPayroll = asyncHandler(async (req, res) => {
   });
 });
 
-export const recordSalaryPayment = asyncHandler(async (req, res) => {
+const recordSalaryPayment = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
   const { transactionReference, notes, paymentMethod, amountPaid } = req.body;
@@ -900,7 +890,7 @@ export const recordSalaryPayment = asyncHandler(async (req, res) => {
   });
 });
 
-export const listLedgerTransactions = asyncHandler(async (req, res) => {
+const listLedgerTransactions = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const list = await Transaction.findAll({
     where: { tenantId },
@@ -913,7 +903,7 @@ export const listLedgerTransactions = asyncHandler(async (req, res) => {
   });
 });
 
-export const updatePayroll = asyncHandler(async (req, res) => {
+const updatePayroll = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
   const input = req.body;
@@ -930,7 +920,7 @@ export const updatePayroll = asyncHandler(async (req, res) => {
   });
 });
 
-export const deletePayroll = asyncHandler(async (req, res) => {
+const deletePayroll = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { id } = req.params;
 
@@ -945,7 +935,7 @@ export const deletePayroll = asyncHandler(async (req, res) => {
   });
 });
 
-export const clearFinanceData = asyncHandler(async (req, res) => {
+const clearFinanceData = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   await Expense.destroy({ where: { tenantId } });
   await Liability.destroy({ where: { tenantId } });
@@ -958,3 +948,31 @@ export const clearFinanceData = asyncHandler(async (req, res) => {
     message: 'All ledger logs, subscriptions, payrolls, liabilities, and expenses have been cleared successfully'
   });
 });
+
+module.exports = {
+  triggerSeed,
+  getFinanceSummary,
+  getCashFlowHistory,
+  getSankeyData,
+  getFinancialCalendarEvents,
+  getCopilotResponse,
+  listExpenses,
+  createExpense,
+  updateExpense,
+  deleteExpense,
+  listLiabilities,
+  createLiability,
+  updateLiability,
+  deleteLiability,
+  listSubscriptions,
+  createSubscription,
+  updateSubscription,
+  deleteSubscription,
+  listPayroll,
+  createPayroll,
+  recordSalaryPayment,
+  listLedgerTransactions,
+  updatePayroll,
+  deletePayroll,
+  clearFinanceData
+};

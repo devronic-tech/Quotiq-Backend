@@ -1,6 +1,6 @@
-import { ValidationError } from '../utils/app-error.js';
+const { ValidationError } = require('../utils/app-error.js');
 
-export function validate(schemas) {
+function validate(schemas) {
   return (req, _res, next) => {
     const errors = {};
 
@@ -51,3 +51,7 @@ export function validate(schemas) {
     next();
   };
 }
+
+module.exports = {
+  validate
+};

@@ -1,5 +1,5 @@
-import pino from 'pino';
-import { env } from '../config/env.js';
+const pino = require('pino');
+const { env } = require('../config/env.js');
 
 const transport =
   env.NODE_ENV === 'development'
@@ -13,7 +13,7 @@ const transport =
       }
     : undefined;
 
-export const logger = pino({
+const logger = pino({
   level: env.LOG_LEVEL,
   transport,
   redact: {
@@ -26,3 +26,7 @@ export const logger = pino({
     res: pino.stdSerializers.res,
   },
 });
+
+module.exports = {
+  logger
+};

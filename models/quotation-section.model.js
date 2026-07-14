@@ -1,7 +1,7 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database.js');
 
-export class QuotationSection extends Model {}
+class QuotationSection extends Model {}
 
 QuotationSection.init(
   {
@@ -34,3 +34,7 @@ QuotationSection.init(
     timestamps: true,
   }
 );
+
+module.exports = {
+  QuotationSection
+};

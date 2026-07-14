@@ -1,8 +1,8 @@
-import { Model, DataTypes } from 'sequelize';
-import bcrypt from 'bcryptjs';
-import { sequelize } from '../config/database.js';
+const { Model, DataTypes } = require('sequelize');
+const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/database.js');
 
-export const Role = {
+const Role = {
   OWNER: 'owner',
   ADMIN: 'admin',
   MANAGER: 'manager',
@@ -11,7 +11,7 @@ export const Role = {
   VIEWER: 'viewer',
 };
 
-export class User extends Model {
+class User extends Model {
   get fullName() {
     return `${this.firstName} ${this.lastName}`;
   }
@@ -136,3 +136,8 @@ User.init(
     },
   }
 );
+
+module.exports = {
+  Role,
+  User
+};

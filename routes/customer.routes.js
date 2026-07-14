@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import { customerSchema } from '../schemas/customer.schema.js';
-import { validate } from '../middleware/validate.middleware.js';
-import { authenticate } from '../middleware/auth.middleware.js';
-import * as customerController from '../controllers/customer.controller.js';
+const { Router } = require('express');
+const { customerSchema } = require('../schemas/customer.schema.js');
+const { validate } = require('../middleware/validate.middleware.js');
+const { authenticate } = require('../middleware/auth.middleware.js');
+const customerController = require('../controllers/customer.controller.js');
 
 const router = Router();
 
@@ -14,4 +14,4 @@ router.post('/', validate({ body: customerSchema }), customerController.createCu
 router.put('/:id', validate({ body: customerSchema }), customerController.updateCustomer);
 router.delete('/:id', customerController.deleteCustomer);
 
-export default router;
+module.exports = router;

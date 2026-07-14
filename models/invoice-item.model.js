@@ -1,7 +1,7 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database.js');
 
-export class InvoiceItem extends Model {}
+class InvoiceItem extends Model {}
 
 InvoiceItem.init(
   {
@@ -54,3 +54,7 @@ InvoiceItem.init(
     timestamps: true,
   }
 );
+
+module.exports = {
+  InvoiceItem
+};

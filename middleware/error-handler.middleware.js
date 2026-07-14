@@ -1,11 +1,11 @@
-import { StatusCodes } from 'http-status-codes';
-import pkg from 'sequelize';
+const { StatusCodes } = require('http-status-codes');
+const pkg = require('sequelize');
 const { UniqueConstraintError, ValidationError: SequelizeValidationError, ForeignKeyConstraintError, DatabaseError } = pkg;
-import { AppError } from '../utils/app-error.js';
-import { logger } from '../utils/logger.js';
-import { env } from '../config/env.js';
+const { AppError } = require('../utils/app-error.js');
+const { logger } = require('../utils/logger.js');
+const { env } = require('../config/env.js');
 
-export function errorHandler(err, req, res, _next) {
+function errorHandler(err, req, res, _next) {
   let statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
   let code = 'INTERNAL_ERROR';
   let message = 'An unexpected error occurred';
@@ -81,3 +81,7 @@ export function errorHandler(err, req, res, _next) {
 
   res.status(statusCode).json(response);
 }
+
+module.exports = {
+  errorHandler
+};

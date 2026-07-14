@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import { authenticate } from '../middleware/auth.middleware.js';
-import * as financeController from '../controllers/finance.controller.js';
+const { Router } = require('express');
+const { authenticate } = require('../middleware/auth.middleware.js');
+const financeController = require('../controllers/finance.controller.js');
 
 const router = Router();
 
@@ -44,4 +44,4 @@ router.post('/payroll/:id/pay', financeController.recordSalaryPayment);
 // Clear data route
 router.delete('/clear', financeController.clearFinanceData);
 
-export default router;
+module.exports = router;

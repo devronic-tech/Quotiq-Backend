@@ -1,50 +1,55 @@
 const { Model, DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database.js');
 
-class RefreshToken extends Model {}
+class OtpVerification extends Model {}
 
-RefreshToken.init(
+OtpVerification.init(
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
-      type: DataTypes.UUID,
+    email: {
+      type: DataTypes.STRING(255),
       allowNull: false,
-      references: { model: 'users', key: 'id' },
-      onDelete: 'CASCADE',
     },
-    hashedToken: {
-      type: DataTypes.STRING(64),
+    otp: {
+      type: DataTypes.STRING(255), // Will store bcrypt hash of the OTP
       allowNull: false,
-      unique: true,
     },
-    device: {
-      type: DataTypes.STRING(100),
+    type: {
+      type: DataTypes.ENUM('login', 'signup', 'forgot_password'),
       allowNull: false,
-      defaultValue: 'unknown',
     },
     expiresAt: {
       type: DataTypes.DATE,
       allowNull: false,
+    },
+    verified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    attempts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
   },
   {
     sequelize,
-    tableName: 'refresh_tokens',
+    tableName: 'otp_verifications',
     timestamps: true,
     indexes: [
-      { fields: ['userId'] },
-      { fields: ['hashedToken'] },
+      { fields: ['email', 'type'] },
       { fields: ['expiresAt'] },
     ],
   }
 );
 
 module.exports = {
-  RefreshToken
+  OtpVerification,
 };

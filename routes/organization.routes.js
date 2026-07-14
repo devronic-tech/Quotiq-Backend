@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import { authenticate } from '../middleware/auth.middleware.js';
-import { getOrganization, updateOrganization } from '../controllers/organization.controller.js';
+const { Router } = require('express');
+const { authenticate } = require('../middleware/auth.middleware.js');
+const { getOrganization, updateOrganization } = require('../controllers/organization.controller.js');
 
 const router = Router();
 
@@ -10,4 +10,4 @@ router.route('/')
   .get(getOrganization)
   .put(updateOrganization);
 
-export default router;
+module.exports = router;

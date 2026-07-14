@@ -1,25 +1,25 @@
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import hpp from 'hpp';
-import pinoHttp from 'pino-http';
-import { env } from './config/env.js';
-import { logger } from './utils/logger.js';
-import { requestIdMiddleware } from './middleware/request-id.middleware.js';
-import { apiLimiter } from './middleware/rate-limiter.middleware.js';
-import { errorHandler } from './middleware/error-handler.middleware.js';
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const hpp = require('hpp');
+const pinoHttp = require('pino-http');
+const { env } = require('./config/env.js');
+const { logger } = require('./utils/logger.js');
+const { requestIdMiddleware } = require('./middleware/request-id.middleware.js');
+const { apiLimiter } = require('./middleware/rate-limiter.middleware.js');
+const { errorHandler } = require('./middleware/error-handler.middleware.js');
 
-import authRoutes from './routes/auth.routes.js';
-import healthRoutes from './routes/health.routes.js';
-import departmentRoutes from './routes/department.routes.js';
-import customerRoutes from './routes/customer.routes.js';
-import productServiceRoutes from './routes/product-service.routes.js';
-import quotationRoutes from './routes/quotation.routes.js';
-import invoiceRoutes from './routes/invoice.routes.js';
-import aiRoutes from './routes/ai.routes.js';
-import organizationRoutes from './routes/organization.routes.js';
-import offerLetterRoutes from './routes/offer-letter.routes.js';
-import financeRoutes from './routes/finance.routes.js';
+const authRoutes = require('./routes/auth.routes.js');
+const healthRoutes = require('./routes/health.routes.js');
+const departmentRoutes = require('./routes/department.routes.js');
+const customerRoutes = require('./routes/customer.routes.js');
+const productServiceRoutes = require('./routes/product-service.routes.js');
+const quotationRoutes = require('./routes/quotation.routes.js');
+const invoiceRoutes = require('./routes/invoice.routes.js');
+const aiRoutes = require('./routes/ai.routes.js');
+const organizationRoutes = require('./routes/organization.routes.js');
+const offerLetterRoutes = require('./routes/offer-letter.routes.js');
+const financeRoutes = require('./routes/finance.routes.js');
 
 const app = express();
 
@@ -44,9 +44,7 @@ app.use(
     customProps: (req) => ({
       requestId: req.requestId,
     }),
-    autoLogging: {
-      ignore: (req) => req.url === '/api/health' || req.url === '/api/health/live' || req.url === '/api/v1/health',
-    },
+    autoLogging: false,
   })
 );
 app.use(hpp());
@@ -83,4 +81,4 @@ app.use((_req, res) => {
 
 app.use(errorHandler);
 
-export default app;
+module.exports = app;

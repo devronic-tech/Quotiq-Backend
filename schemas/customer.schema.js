@@ -1,6 +1,6 @@
-import { z } from 'zod';
+const { z } = require('zod');
 
-export const addressSchema = z.object({
+const addressSchema = z.object({
   type: z.enum(['billing', 'shipping']),
   street: z.string().max(255).trim().optional(),
   city: z.string().max(100).trim().optional(),
@@ -9,7 +9,7 @@ export const addressSchema = z.object({
   country: z.string().max(100).trim().optional(),
 });
 
-export const customerSchema = z.object({
+const customerSchema = z.object({
   name: z.string().min(1, 'Customer contact name is required').max(200).trim(),
   company: z.string().max(200).trim().optional(),
   email: z.string().email('Invalid email address').toLowerCase().trim().or(z.literal('')).optional(),
@@ -23,3 +23,8 @@ export const customerSchema = z.object({
   followupsList: z.array(z.any()).optional(),
   addresses: z.array(addressSchema).optional(),
 });
+
+module.exports = {
+  addressSchema,
+  customerSchema
+};

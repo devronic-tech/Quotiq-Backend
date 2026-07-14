@@ -1,7 +1,7 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database.js');
 
-export class CustomerAddress extends Model {}
+class CustomerAddress extends Model {}
 
 CustomerAddress.init(
   {
@@ -55,3 +55,7 @@ CustomerAddress.init(
     timestamps: true,
   }
 );
+
+module.exports = {
+  CustomerAddress
+};

@@ -1,12 +1,12 @@
-import { Organization } from '../models/index.js';
-import { StatusCodes } from 'http-status-codes';
-import { asyncHandler } from '../utils/async-handler.js';
-import { NotFoundError } from '../utils/app-error.js';
+const { Organization } = require('../models/index.js');
+const { StatusCodes } = require('http-status-codes');
+const { asyncHandler } = require('../utils/async-handler.js');
+const { NotFoundError } = require('../utils/app-error.js');
 
 /**
  * GET /api/v1/organization
  */
-export const getOrganization = asyncHandler(async (req, res) => {
+const getOrganization = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const org = await Organization.findByPk(tenantId);
   if (!org) {
@@ -22,7 +22,7 @@ export const getOrganization = asyncHandler(async (req, res) => {
 /**
  * PUT /api/v1/organization
  */
-export const updateOrganization = asyncHandler(async (req, res) => {
+const updateOrganization = asyncHandler(async (req, res) => {
   const tenantId = req.tenantId;
   const { name, email, phone, website, address, currency, settings } = req.body;
 
@@ -50,3 +50,8 @@ export const updateOrganization = asyncHandler(async (req, res) => {
     message: 'Organization settings updated successfully',
   });
 });
+
+module.exports = {
+  getOrganization,
+  updateOrganization
+};
