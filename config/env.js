@@ -38,7 +38,7 @@ const envSchema = z.object({
   SMTP_PASS: z.string().default(''),
   SMTP_FROM: z.string().default('QuotaFlow <noreply@quotaflow.com>'),
 
-  // CORS
+  // CORS — supports comma-separated list: "https://a.com,https://b.com"
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
 
   // Logging

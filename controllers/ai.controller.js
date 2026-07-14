@@ -9,30 +9,39 @@ const { ValidationError } = require('../utils/app-error.js');
  */
 async function transcribeAudio(audioBuffer, mimeType) {
   if (!env.DEEPGRAM_API_KEY) {
-    throw new Error('Deepgram API key is not configured');
+    throw new Error('Deepgram API key is not configured on the server');
   }
 
-  const response = await fetch('https://api.deepgram.com/v1/listen?smart_format=true&model=nova-2', {
+  // Normalize MIME type — browser MediaRecorder sends "audio/webm;codecs=opus"
+  // Deepgram only accepts the base type without codec parameters
+  const baseMimeType = (mimeType || 'audio/webm').split(';')[0].trim();
+
+  logger.info({ mimeType, baseMimeType, bufferSize: audioBuffer.length }, 'Sending audio to Deepgram');
+
+  const response = await fetch('https://api.deepgram.com/v1/listen?smart_format=true&model=nova-2&language=en', {
     method: 'POST',
     headers: {
       'Authorization': `Token ${env.DEEPGRAM_API_KEY}`,
-      'Content-Type': mimeType || 'audio/wav',
+      'Content-Type': baseMimeType,
     },
     body: audioBuffer,
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    logger.error({ status: response.status, error: errText }, 'Deepgram transcription failed');
-    throw new Error(`Deepgram API returned status ${response.status}`);
+    logger.error({ status: response.status, error: errText, mimeType: baseMimeType }, 'Deepgram transcription failed');
+    throw new Error(`Deepgram API returned ${response.status}: ${errText}`);
   }
 
   const result = await response.json();
   const transcript = result.results?.channels?.[0]?.alternatives?.[0]?.transcript;
-  if (!transcript) {
-    throw new Error('Failed to extract transcript from Deepgram response');
+
+  if (!transcript || transcript.trim() === '') {
+    logger.warn({ result }, 'Deepgram returned empty transcript — audio may be silent or too short');
+    throw new Error('No speech detected in audio. Please speak clearly and try again.');
   }
 
+  logger.info({ transcriptLength: transcript.length }, 'Deepgram transcription successful');
   return transcript;
 }
 
