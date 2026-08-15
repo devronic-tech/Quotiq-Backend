@@ -7,7 +7,7 @@ const serviceController = require('../controllers/service.controller.js');
 
 const router = Router();
 
-router.use(authenticate);
+router.use(['/products', '/services'], authenticate);
 
 // Products CRUD
 router.get('/products', productController.listProducts);

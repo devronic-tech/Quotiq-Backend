@@ -124,12 +124,11 @@ async function connectDatabase() {
     const { registerAssociations } = require('../models/index.js');
     registerAssociations();
 
-    // Sync database models (CREATE TABLE IF NOT EXISTS) so tables are created on fresh deployments
-    if (env.NODE_ENV === 'development') {
+    // Auto-sync disabled by default to prevent running table check queries on every server restart.
+    // Database schema changes should be managed via migrations (npm run db:migrate)
+    if (process.env.DB_AUTO_SYNC === 'true') {
       await sequelize.sync();
-      logger.info('✅ Database tables loaded and synced (dev-only sync)');
-    } else {
-      logger.info('🚀 Production/Staging: skipping auto-sync. Ensure migrations are run.');
+      logger.info('✅ Database models auto-synced (DB_AUTO_SYNC=true)');
     }
   } catch (error) {
     logger.fatal({ error }, '❌ Failed to connect to PostgreSQL');

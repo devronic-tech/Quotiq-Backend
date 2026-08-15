@@ -20,6 +20,7 @@ const aiRoutes = require('./routes/ai.routes.js');
 const organizationRoutes = require('./routes/organization.routes.js');
 const offerLetterRoutes = require('./routes/offer-letter.routes.js');
 const financeRoutes = require('./routes/finance.routes.js');
+const portalRoutes = require('./routes/portal.routes.js');
 
 const app = express();
 
@@ -44,7 +45,22 @@ const corsOptions = {
   optionsSuccessStatus: 200, // Some browsers (IE11) choke on 204
 };
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
+    frameguard: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'", '*'],
+        frameAncestors: ['*'],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        imgSrc: ["'self'", 'data:', 'blob:', '*'],
+        mediaSrc: ["'self'", 'blob:', '*'],
+      },
+    },
+  })
+);
 app.use(cors(corsOptions));
 // Handle CORS preflight (OPTIONS) for all routes
 app.options('*', cors(corsOptions));
@@ -98,6 +114,7 @@ app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/organization', organizationRoutes);
 app.use('/api/v1/offers', offerLetterRoutes);
 app.use('/api/v1/finance', financeRoutes);
+app.use('/api/v1/portal', portalRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({

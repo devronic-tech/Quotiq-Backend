@@ -3,16 +3,17 @@ const { UnauthorizedError } = require('../utils/app-error.js');
 const { env } = require('../config/env.js');
 
 function authenticate(req, _res, next) {
+  let token;
   const authHeader = req.headers.authorization;
 
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw new UnauthorizedError('No authentication token provided');
+  if (authHeader?.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query && req.query.token) {
+    token = req.query.token;
   }
 
-  const token = authHeader.split(' ')[1];
-
   if (!token) {
-    throw new UnauthorizedError('Invalid authentication token format');
+    throw new UnauthorizedError('No authentication token provided');
   }
 
   try {

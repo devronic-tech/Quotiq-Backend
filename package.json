@@ -11,6 +11,8 @@
     "db:migration": "node scripts/make-migration.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1097.0",
+    "@aws-sdk/s3-request-presigner": "^3.1097.0",
     "@casl/ability": "^6.7.0",
     "bcryptjs": "^3.0.0",
     "cors": "^2.8.5",

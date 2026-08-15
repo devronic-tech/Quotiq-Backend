@@ -19,6 +19,15 @@ const { Subscription } = require('./subscription.model.js');
 const { Payroll } = require('./payroll.model.js');
 const { Transaction } = require('./transaction.model.js');
 const { OtpVerification } = require('./otp-verification.model.js');
+const { PortalAccount } = require('./portal-account.model.js');
+const { PortalFolder } = require('./portal-folder.model.js');
+const { PortalFile } = require('./portal-file.model.js');
+const { PortalFileVersion } = require('./portal-file-version.model.js');
+const { PortalTextPost } = require('./portal-text-post.model.js');
+const { PortalLink } = require('./portal-link.model.js');
+const { PortalActivity } = require('./portal-activity.model.js');
+const { PortalNotification } = require('./portal-notification.model.js');
+const { PortalDocumentComment } = require('./portal-document-comment.model.js');
 
 function registerAssociations() {
   // Organization ↔ User
@@ -300,6 +309,125 @@ function registerAssociations() {
     foreignKey: 'tenantId',
     as: 'organization',
   });
+
+  // Customer ↔ PortalAccount
+  Customer.hasOne(PortalAccount, {
+    foreignKey: 'customerId',
+    as: 'portalAccount',
+    onDelete: 'CASCADE',
+  });
+  PortalAccount.belongsTo(Customer, {
+    foreignKey: 'customerId',
+    as: 'customer',
+  });
+
+  // Customer ↔ PortalFolder
+  Customer.hasMany(PortalFolder, {
+    foreignKey: 'customerId',
+    as: 'portalFolders',
+    onDelete: 'CASCADE',
+  });
+  PortalFolder.belongsTo(Customer, {
+    foreignKey: 'customerId',
+    as: 'customer',
+  });
+
+  // PortalFolder self-reference
+  PortalFolder.hasMany(PortalFolder, {
+    foreignKey: 'parentId',
+    as: 'subfolders',
+    onDelete: 'SET NULL',
+  });
+  PortalFolder.belongsTo(PortalFolder, {
+    foreignKey: 'parentId',
+    as: 'parentFolder',
+  });
+
+  // Customer & Folder ↔ PortalFile
+  Customer.hasMany(PortalFile, {
+    foreignKey: 'customerId',
+    as: 'portalFiles',
+    onDelete: 'CASCADE',
+  });
+  PortalFile.belongsTo(Customer, {
+    foreignKey: 'customerId',
+    as: 'customer',
+  });
+  PortalFolder.hasMany(PortalFile, {
+    foreignKey: 'folderId',
+    as: 'files',
+    onDelete: 'SET NULL',
+  });
+  PortalFile.belongsTo(PortalFolder, {
+    foreignKey: 'folderId',
+    as: 'folder',
+  });
+
+  // PortalFile ↔ PortalFileVersion
+  PortalFile.hasMany(PortalFileVersion, {
+    foreignKey: 'fileId',
+    as: 'versions',
+    onDelete: 'CASCADE',
+  });
+  PortalFileVersion.belongsTo(PortalFile, {
+    foreignKey: 'fileId',
+    as: 'file',
+  });
+
+  // Customer ↔ PortalTextPost
+  Customer.hasMany(PortalTextPost, {
+    foreignKey: 'customerId',
+    as: 'textPosts',
+    onDelete: 'CASCADE',
+  });
+  PortalTextPost.belongsTo(Customer, {
+    foreignKey: 'customerId',
+    as: 'customer',
+  });
+
+  // Customer ↔ PortalLink
+  Customer.hasMany(PortalLink, {
+    foreignKey: 'customerId',
+    as: 'portalLinks',
+    onDelete: 'CASCADE',
+  });
+  PortalLink.belongsTo(Customer, {
+    foreignKey: 'customerId',
+    as: 'customer',
+  });
+
+  // Customer ↔ PortalActivity
+  Customer.hasMany(PortalActivity, {
+    foreignKey: 'customerId',
+    as: 'portalActivities',
+    onDelete: 'CASCADE',
+  });
+  PortalActivity.belongsTo(Customer, {
+    foreignKey: 'customerId',
+    as: 'customer',
+  });
+
+  // Customer ↔ PortalNotification
+  Customer.hasMany(PortalNotification, {
+    foreignKey: 'customerId',
+    as: 'portalNotifications',
+    onDelete: 'CASCADE',
+  });
+  PortalNotification.belongsTo(Customer, {
+    foreignKey: 'customerId',
+    as: 'customer',
+  });
+
+  // PortalFile ↔ PortalDocumentComment
+  PortalFile.hasMany(PortalDocumentComment, {
+    foreignKey: 'fileId',
+    as: 'comments',
+    onDelete: 'CASCADE',
+  });
+  PortalDocumentComment.belongsTo(PortalFile, {
+    foreignKey: 'fileId',
+    as: 'file',
+  });
 }
 
 module.exports = {
@@ -326,4 +454,14 @@ module.exports = {
   Payroll,
   Transaction,
   OtpVerification,
+  PortalAccount,
+  PortalFolder,
+  PortalFile,
+  PortalFileVersion,
+  PortalTextPost,
+  PortalLink,
+  PortalActivity,
+  PortalNotification,
+  PortalDocumentComment,
 };
+
