@@ -154,37 +154,42 @@ const login = asyncHandler(async (req, res) => {
   await user.update({
     failedLoginAttempts: 0,
     lockUntil: null,
+    lastLoginAt: new Date(),
   });
 
-  // Generate and send Login OTP
-  const otp = crypto.randomInt(100000, 1000000).toString();
-  const salt = await bcrypt.genSalt(10);
-  const hashedOtp = await bcrypt.hash(otp, salt);
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-  // Delete existing login OTPs
-  await OtpVerification.destroy({ where: { email, type: 'login' } });
-
-  // Save OTP to database
-  await OtpVerification.create({
-    email,
-    otp: hashedOtp,
-    type: 'login',
-    expiresAt,
+  const tokens = generateTokens({
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    tenantId: user.tenantId,
   });
 
-  // Send OTP email
-  await sendOTPEmail(email, otp, 'login');
+  // Enforce max sessions limit
+  const sessionCount = await RefreshToken.count({ where: { userId: user.id } });
+  if (sessionCount >= MAX_SESSIONS) {
+    const oldest = await RefreshToken.findOne({
+      where: { userId: user.id },
+      order: [['createdAt', 'ASC']],
+    });
+    if (oldest) await oldest.destroy();
+  }
 
-  logger.info({ userId: user.id, email }, 'Login OTP sent');
+  await RefreshToken.create({
+    userId: user.id,
+    hashedToken: hashToken(tokens.refreshToken),
+    device: 'web',
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  });
+
+  logger.info({ userId: user.id, email }, 'User logged in');
 
   res.status(StatusCodes.OK).json({
     success: true,
     data: {
-      otpRequired: true,
-      email,
+      user: user.toPublicJSON(),
+      tokens,
     },
-    message: 'Verification code sent to your email',
+    message: 'Login successful',
   });
 });
 
